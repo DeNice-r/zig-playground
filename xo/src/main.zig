@@ -1,16 +1,10 @@
 const std = @import("std");
 const console = @import("./console.zig");
 
-const stdout_file = std.io.getStdOut().writer();
-var bw = std.io.bufferedWriter(stdout_file);
-const stdout = bw.writer();
-
-const stdin_file = std.io.getStdIn().reader();
-
 pub fn main() !void {
     const game = Game();
-    try game.loop();
-    try bw.flush();
+    game.loop();
+    console.flush();
 }
 
 fn Game() type {
@@ -52,38 +46,29 @@ fn Game() type {
         var map = [_][3]Field{[_]Field{Field.Free} ** 3} ** 3;
         var move_count: u8 = 0;
 
-        pub fn loop() !void {
+        pub fn loop() void {
             var state = get_state();
             console.clear();
 
             while (state == State.Ongoing) {
-                try print();
-                var buf: [1024]u8 = undefined;
-                const maybe_choice = try stdin_file.readUntilDelimiterOrEof(&buf, '\n');
-                var choice: u8 = undefined;
+                print();
+                var choice: u8 = console.readChar();
 
-                if (maybe_choice == null or maybe_choice.?.len != 1) {
-                    continue;
-                } else {
-                    choice = maybe_choice.?[0];
-                }
                 if (choice < '1' or choice > '9') {
                     continue;
                 }
-                choice -= '0' + 1;
-
-                //try stdout_file.print("{d}, {d}", .{ choice / 3, choice % 3 });
+                choice -= '0' + 1; // input is 1-based
                 move(choice / 3, choice % 3, if (move_count % 2 == 0) Field.X else Field.O) catch continue;
-                try print();
+                print();
 
                 state = get_state();
             }
 
             console.clear();
             if (state == State.Draw) {
-                try stdout_file.print("The power of friendship (or flawness of the game) won!", .{});
+                console.print("The power of friendship (or flawness of the game) won!", .{});
             } else {
-                try stdout_file.print("{c} won!", .{state.to_string()});
+                console.print("{c} won!", .{state.to_string()});
             }
         }
 
@@ -148,19 +133,19 @@ fn Game() type {
             move_count += 1;
         }
 
-        fn print() !void {
+        fn print() void {
             console.reset();
             for (map, 0..) |x, x_index| {
                 for (x, 1..) |y, y_index| {
                     if (is_free(y)) {
-                        try stdout.print("{} ", .{x_index * 3 + y_index});
+                        console.print("{} ", .{x_index * 3 + y_index});
                     } else {
-                        try stdout.print("{c} ", .{y.to_string()});
+                        console.print("{c} ", .{y.to_string()});
                     }
                 }
-                try stdout.print("\n", .{});
+                console.print("\n", .{});
             }
-            try bw.flush();
+            console.flush();
         }
     };
 }
