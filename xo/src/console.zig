@@ -50,7 +50,7 @@ pub fn flush() void {
 }
 
 pub fn readUntilEoi() []u8 { // End of input: EOF or delimiter '\n'
-    var buf: [4096]u8 = undefined;
+    var buf: [BUF_SIZE]u8 = undefined;
     if (stdin_file.readUntilDelimiterOrEof(&buf, '\n') catch return &[0]u8{}) |val| {
         return val;
     }
