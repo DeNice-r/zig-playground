@@ -52,10 +52,10 @@ pub fn flush() void {
 
 pub fn readUntilEoi() []u8 { // End of input: EOF or delimiter '\n'
     var buf: [BUF_SIZE]u8 = undefined;
-    if (stdin_file.readUntilDelimiterOrEof(&buf, '\n') catch return &[0]u8{}) |val| {
+    if (stdin_file.readUntilDelimiterOrEof(&buf, '\n') catch return "") |val| {
         return val;
     }
-    return &[0]u8{};
+    return "";
 }
 
 pub fn readChar() !u8 {
