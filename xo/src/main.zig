@@ -52,7 +52,7 @@ fn Game() type {
 
             while (state == State.Ongoing) {
                 print();
-                var choice: u8 = console.readChar();
+                var choice: u8 = console.readChar() catch continue;
 
                 if (choice < '1' or choice > '9') {
                     continue;

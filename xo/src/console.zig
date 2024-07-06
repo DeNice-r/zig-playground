@@ -57,10 +57,10 @@ pub fn readUntilEoi() []u8 { // End of input: EOF or delimiter '\n'
     return &[0]u8{};
 }
 
-pub fn readChar() u8 {
+pub fn readChar() !u8 {
     const input = readUntilEoi();
     if (input.len != 1) {
-        return 'E';
+        return error.WrongCharCount;
     }
     return input[0];
 }
