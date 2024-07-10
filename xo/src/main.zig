@@ -1,5 +1,9 @@
 const std = @import("std");
 const console = @import("./console.zig");
+const ansi = @import("./ansi.zig");
+
+const BG_COLOR = "121212";
+const FG_COLOR = "303030";
 
 pub fn main() !void {
     const game = Game();
@@ -19,6 +23,15 @@ fn Game() type {
                     .Free => ' ',
                     .X => 'X',
                     .O => 'O',
+                };
+            }
+
+            // TODO: investigate why compile time wont let me do this
+            fn to_colored_string(self: Field) []const u8 {
+                return switch (self) {
+                    .Free => " ",
+                    .X => ansi.setFore("X", "FF0000"),
+                    .O => ansi.setFore("O", "0000FF"),
                 };
             }
         };
@@ -47,8 +60,8 @@ fn Game() type {
         var move_count: u8 = 0;
 
         pub fn loop() void {
-            var state = get_state();
             console.clear();
+            var state = get_state();
 
             while (state == State.Ongoing) {
                 print();
@@ -59,11 +72,11 @@ fn Game() type {
                 }
                 choice -= '0' + 1; // input is 1-based
                 move(choice / 3, choice % 3, if (move_count % 2 == 0) Field.X else Field.O) catch continue;
-                print();
 
                 state = get_state();
             }
 
+            // TODO: investigate why output here starts from 4th line
             console.clear();
             if (state == State.Draw) {
                 console.print("The power of friendship (or flawness of the game) won!", .{});
@@ -138,9 +151,9 @@ fn Game() type {
             for (map, 0..) |x, x_index| {
                 for (x, 1..) |y, y_index| {
                     if (is_free(y)) {
-                        console.print("{} ", .{x_index * 3 + y_index});
+                        console.print(ansi.setFore(ansi.setBack(" {d} ", BG_COLOR), FG_COLOR), .{x_index * 3 + y_index});
                     } else {
-                        console.print("{c} ", .{y.to_string()});
+                        console.print(ansi.setBack(" {c} ", BG_COLOR), .{y.to_string()});
                     }
                 }
                 console.print("\n", .{});
